@@ -9,6 +9,7 @@ from app.database import get_db
 from app.crud import ability_crud
 
 router = APIRouter()
+from app.utils.serializer import model_to_dict, models_to_list, serialize_response
 
 # 模拟特性数据
 ABILITIES_DATA = [
@@ -101,14 +102,7 @@ async def get_abilities_list(
             generation=generation
         )
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(data=models_to_list(data), total=total, page=page, page_size=page_size, message="获取成功")
     except Exception as e:
         return {
             "success": False,
@@ -146,11 +140,7 @@ async def get_ability(
         if not ability:
             raise HTTPException(status_code=404, detail="特性不存在")
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": ability
-        }
+        return serialize_response(data=model_to_dict(ability))
     except HTTPException:
         raise
     except Exception as e:
@@ -169,11 +159,7 @@ async def create_ability(
     """创建特性"""
     try:
         ability = ability_crud.create(db=db, obj_in=ability_in)
-        return {
-            "success": True,
-            "message": "创建成功",
-            "data": ability
-        }
+        return serialize_response(data=model_to_dict(ability))
     except Exception as e:
         return {
             "success": False,
@@ -195,11 +181,7 @@ async def update_ability(
             raise HTTPException(status_code=404, detail="特性不存在")
         
         ability = ability_crud.update(db=db, db_obj=ability, obj_in=ability_in)
-        return {
-            "success": True,
-            "message": "更新成功",
-            "data": ability
-        }
+        return serialize_response(data=model_to_dict(ability))
     except HTTPException:
         raise
     except Exception as e:
@@ -222,11 +204,7 @@ async def delete_ability(
             raise HTTPException(status_code=404, detail="特性不存在")
         
         ability_crud.remove(db=db, id=ability_id)
-        return {
-            "success": True,
-            "message": "删除成功",
-            "data": None
-        }
+        return serialize_response(data=model_to_dict(None))
     except HTTPException:
         raise
     except Exception as e:

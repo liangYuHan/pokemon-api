@@ -4,7 +4,6 @@ FastAPI主应用
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from typing import Optional
 import uvicorn
 
@@ -16,6 +15,9 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# 导入管理后台（会自动注册路由）
+import admin
 
 # 添加CORS中间件
 app.add_middleware(

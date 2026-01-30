@@ -1,12 +1,14 @@
 """
 宝可梦路由
 """
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends, Form
 from sqlalchemy.orm import Session
 from typing import Optional, List
+import json
 
 from app.database import get_db
 from app.crud import pokemon_crud
+from app.utils.serializer import model_to_dict, models_to_list, serialize_response
 
 router = APIRouter()
 
@@ -117,25 +119,23 @@ async def get_pokemon_list(
             search=search
         )
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size,
-            "has_next": skip + page_size < total
-        }
+        return serialize_response(
+            data=models_to_list(data),
+            total=total,
+            page=page,
+            page_size=page_size,
+            has_next=skip + page_size < total
+        )
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"获取失败: {str(e)}",
-            "data": [],
-            "total": 0,
-            "page": page,
-            "page_size": page_size,
-            "has_next": False
-        }
+        return serialize_response(
+            data=[],
+            success=False,
+            message=f"获取失败: {str(e)}",
+            total=0,
+            page=page,
+            page_size=page_size,
+            has_next=False
+        )
 
 
 @router.get("/{pokemon_id_or_name}", response_model=dict)
@@ -164,19 +164,17 @@ async def get_pokemon(
         if not pokemon:
             raise HTTPException(status_code=404, detail="宝可梦不存在")
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": pokemon
-        }
+        return serialize_response(
+            data=model_to_dict(pokemon)
+        )
     except HTTPException:
         raise
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"获取失败: {str(e)}",
-            "data": None
-        }
+        return serialize_response(
+            data=None,
+            success=False,
+            message=f"获取失败: {str(e)}"
+        )
 
 
 @router.get("/type/{type_name}", response_model=dict)
@@ -197,23 +195,21 @@ async def get_pokemon_by_type(
         )
         total = pokemon_crud.get_count_by_type(db=db, type_name=type_name)
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(
+            data=models_to_list(data),
+            total=total,
+            page=page,
+            page_size=page_size
+        )
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"获取失败: {str(e)}",
-            "data": [],
-            "total": 0,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(
+            data=[],
+            success=False,
+            message=f"获取失败: {str(e)}",
+            total=0,
+            page=page,
+            page_size=page_size
+        )
 
 
 @router.get("/search/{query}", response_model=dict)
@@ -234,23 +230,21 @@ async def search_pokemon(
         )
         total = pokemon_crud.get_search_count(db=db, query=query)
         
-        return {
-            "success": True,
-            "message": "搜索成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(
+            data=models_to_list(data),
+            total=total,
+            page=page,
+            page_size=page_size
+        )
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"搜索失败: {str(e)}",
-            "data": [],
-            "total": 0,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(
+            data=[],
+            success=False,
+            message=f"搜索失败: {str(e)}",
+            total=0,
+            page=page,
+            page_size=page_size
+        )
 
 
 @router.post("/", response_model=dict)
@@ -261,17 +255,16 @@ async def create_pokemon(
     """创建宝可梦"""
     try:
         pokemon = pokemon_crud.create(db=db, obj_in=pokemon_in)
-        return {
-            "success": True,
-            "message": "创建成功",
-            "data": pokemon
-        }
+        return serialize_response(
+            data=model_to_dict(pokemon),
+            message="创建成功"
+        )
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"创建失败: {str(e)}",
-            "data": None
-        }
+        return serialize_response(
+            data=None,
+            success=False,
+            message=f"创建失败: {str(e)}"
+        )
 
 
 @router.put("/{pokemon_id}", response_model=dict)
@@ -287,19 +280,18 @@ async def update_pokemon(
             raise HTTPException(status_code=404, detail="宝可梦不存在")
         
         pokemon = pokemon_crud.update(db=db, db_obj=pokemon, obj_in=pokemon_in)
-        return {
-            "success": True,
-            "message": "更新成功",
-            "data": pokemon
-        }
+        return serialize_response(
+            data=model_to_dict(pokemon),
+            message="更新成功"
+        )
     except HTTPException:
         raise
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"更新失败: {str(e)}",
-            "data": None
-        }
+        return serialize_response(
+            data=None,
+            success=False,
+            message=f"更新失败: {str(e)}"
+        )
 
 
 @router.delete("/{pokemon_id}", response_model=dict)
@@ -314,16 +306,15 @@ async def delete_pokemon(
             raise HTTPException(status_code=404, detail="宝可梦不存在")
         
         pokemon_crud.remove(db=db, id=pokemon_id)
-        return {
-            "success": True,
-            "message": "删除成功",
-            "data": None
-        }
+        return serialize_response(
+            data=None,
+            message="删除成功"
+        )
     except HTTPException:
         raise
     except Exception as e:
-        return {
-            "success": False,
-            "message": f"删除失败: {str(e)}",
-            "data": None
-        }
+        return serialize_response(
+            data=None,
+            success=False,
+            message=f"删除失败: {str(e)}"
+        )

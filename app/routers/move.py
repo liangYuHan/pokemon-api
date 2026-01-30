@@ -7,6 +7,7 @@ from typing import Optional, List
 
 from app.database import get_db
 from app.crud import move_crud
+from app.utils.serializer import model_to_dict, models_to_list, serialize_response
 
 router = APIRouter()
 
@@ -119,14 +120,7 @@ async def get_moves_list(
             category=category
         )
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(data=models_to_list(data), total=total, page=page, page_size=page_size, message="获取成功")
     except Exception as e:
         return {
             "success": False,
@@ -164,11 +158,7 @@ async def get_move(
         if not move:
             raise HTTPException(status_code=404, detail="招式不存在")
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": move
-        }
+        return serialize_response(data=model_to_dict(move))
     except HTTPException:
         raise
     except Exception as e:
@@ -197,14 +187,7 @@ async def get_moves_by_type(
         )
         total = move_crud.get_count_by_type(db=db, type_name=type_name)
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(data=models_to_list(data), total=total, page=page, page_size=page_size, message="获取成功")
     except Exception as e:
         return {
             "success": False,
@@ -224,11 +207,7 @@ async def create_move(
     """创建招式"""
     try:
         move = move_crud.create(db=db, obj_in=move_in)
-        return {
-            "success": True,
-            "message": "创建成功",
-            "data": move
-        }
+        return serialize_response(data=model_to_dict(move))
     except Exception as e:
         return {
             "success": False,
@@ -250,11 +229,7 @@ async def update_move(
             raise HTTPException(status_code=404, detail="招式不存在")
         
         move = move_crud.update(db=db, db_obj=move, obj_in=move_in)
-        return {
-            "success": True,
-            "message": "更新成功",
-            "data": move
-        }
+        return serialize_response(data=model_to_dict(move))
     except HTTPException:
         raise
     except Exception as e:
@@ -277,11 +252,7 @@ async def delete_move(
             raise HTTPException(status_code=404, detail="招式不存在")
         
         move_crud.remove(db=db, id=move_id)
-        return {
-            "success": True,
-            "message": "删除成功",
-            "data": None
-        }
+        return serialize_response(data=model_to_dict(None))
     except HTTPException:
         raise
     except Exception as e:

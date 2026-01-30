@@ -9,6 +9,7 @@ from app.database import get_db
 from app.crud import item_crud
 
 router = APIRouter()
+from app.utils.serializer import model_to_dict, models_to_list, serialize_response
 
 # 模拟道具数据
 ITEMS_DATA = [
@@ -94,14 +95,7 @@ async def get_items_list(
             generation=generation
         )
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(data=models_to_list(data), total=total, page=page, page_size=page_size, message="获取成功")
     except Exception as e:
         return {
             "success": False,
@@ -131,11 +125,7 @@ async def get_item(
         if not item:
             raise HTTPException(status_code=404, detail="道具不存在")
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": item
-        }
+        return serialize_response(data=model_to_dict(item))
     except HTTPException:
         raise
     except Exception as e:
@@ -164,14 +154,7 @@ async def get_items_by_category(
         )
         total = item_crud.get_count_by_category(db=db, category=category)
         
-        return {
-            "success": True,
-            "message": "获取成功",
-            "data": data,
-            "total": total,
-            "page": page,
-            "page_size": page_size
-        }
+        return serialize_response(data=models_to_list(data), total=total, page=page, page_size=page_size, message="获取成功")
     except Exception as e:
         return {
             "success": False,
@@ -191,11 +174,7 @@ async def create_item(
     """创建道具"""
     try:
         item = item_crud.create(db=db, obj_in=item_in)
-        return {
-            "success": True,
-            "message": "创建成功",
-            "data": item
-        }
+        return serialize_response(data=model_to_dict(item))
     except Exception as e:
         return {
             "success": False,
@@ -217,11 +196,7 @@ async def update_item(
             raise HTTPException(status_code=404, detail="道具不存在")
         
         item = item_crud.update(db=db, db_obj=item, obj_in=item_in)
-        return {
-            "success": True,
-            "message": "更新成功",
-            "data": item
-        }
+        return serialize_response(data=model_to_dict(item))
     except HTTPException:
         raise
     except Exception as e:
@@ -245,11 +220,7 @@ async def delete_item(
         
         db.delete(item)
         db.commit()
-        return {
-            "success": True,
-            "message": "删除成功",
-            "data": None
-        }
+        return serialize_response(data=model_to_dict(None))
     except HTTPException:
         raise
     except Exception as e:

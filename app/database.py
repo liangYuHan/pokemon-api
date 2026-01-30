@@ -5,15 +5,26 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-# 创建数据库引擎
-DATABASE_URL = "mysql+pymysql://root:password@localhost:3306/pokemon_api?charset=utf8mb4"
+load_dotenv()
+
+# 从环境变量获取数据库配置
+DATABASE_URL = (
+    f"mysql+pymysql://{os.getenv('MYSQL_USER', 'root')}"
+    f":{os.getenv('MYSQL_PASSWORD', 'password')}"
+    f"@{os.getenv('MYSQL_HOST', 'localhost')}"
+    f":{os.getenv('MYSQL_PORT', '3306')}"
+    f"/{os.getenv('MYSQL_DATABASE', 'pokemon_api')}"
+    f"?charset=utf8mb4"
+)
 
 engine = create_engine(
     DATABASE_URL,
     pool_pre_ping=True,
     pool_recycle=3600,
-    echo=True
+    echo=False
 )
 
 # 创建会话工厂
