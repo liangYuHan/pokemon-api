@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import random
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class PokemonScraper:
@@ -91,7 +91,7 @@ class PokemonScraper:
         # 需要根据实际页面结构调整解析逻辑
         
         # 示例：解析基本信息表
-        info_table = soup.find('table', {'class': ['roundy'])
+        info_table = soup.find('table', class_='roundy')
         if info_table:
             rows = info_table.find_all('tr')
             for row in rows:
@@ -102,7 +102,7 @@ class PokemonScraper:
                     pokemon_data[label] = value
         
         # 解析种族值
-        stats_table = soup.find('table', {'class': ['roundy', 'background-color': '#A0A8A8'})  # 假设种族值表的样式
+        stats_table = soup.find('table', class_='roundy')  # 假设种族值表的样式
         if stats_table:
             rows = stats_table.find_all('tr')
             for row in rows[1:]:  # 跳过表头
@@ -133,7 +133,7 @@ class MoveScraper:
         """获取网页内容"""
         try:
             response = requests.get(url, headers=self.headers, timeout=self.timeout)
-            response.raise_for_status_code()
+            response.raise_for_status()
             return response.text
         except Exception as e:
             if retries < self.max_retries:
@@ -217,7 +217,7 @@ class AbilityScraper:
         """获取网页内容"""
         try:
             response = requests.get(url, headers=self.headers, timeout=self.timeout)
-            response.raise_for_status_code()
+            response.raise_for_status()
             return response.text
         except Exception as e:
             if retries < self.max_retries:
@@ -297,7 +297,7 @@ class ItemScraper:
         """获取网页内容"""
         try:
             response = requests.get(url, headers=self.headers, timeout=self.timeout)
-            response.raise_for_status_code()
+            response.raise_for_status()
             return response.text
         except Exception as e:
             if retries < self.max_retries:

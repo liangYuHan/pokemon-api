@@ -20,17 +20,39 @@ def scrape_and_save_pokemon(start_id: int = 1, end_id: int = 151):
     scraper = PokemonScraper(delay=1.0)
     
     try:
+        success_count = 0
+        skip_count = 0
+        error_count = 0
+        
         for pokemon_id in range(start_id, end_id + 1):
             pokemon_data = scraper.scrape_pokemon_by_id(pokemon_id)
             if pokemon_data:
-                pokemon = Pokemon(**pokemon_data)
-                db.add(pokemon)
-                db.commit()
-                print(f"  保存宝可梦 #{pokemon_id} 成功")
+                # 检查是否已存在
+                existing = db.query(Pokemon).filter(
+                    Pokemon.national_dex == pokemon_data["national_dex"]
+                ).first()
+                
+                if existing:
+                    print(f"  ⏭️  宝可梦 #{pokemon_id} 已存在，跳过")
+                    skip_count += 1
+                else:
+                    pokemon = Pokemon(**pokemon_data)
+                    db.add(pokemon)
+                    db.commit()
+                    print(f"  ✅ 保存宝可梦 #{pokemon_id} 成功")
+                    success_count += 1
+            else:
+                print(f"  ❌ 宝可梦 #{pokemon_id} 爬取失败")
+                error_count += 1
         
-        print(f"成功爬取并保存 {end_id - start_id + 1} 个宝可梦")
+        print(f"\n总结:")
+        print(f"  ✅ 成功保存: {success_count} 个")
+        print(f"  ⏭️  跳过已存在: {skip_count} 个")
+        print(f"  ❌ 爬取失败: {error_count} 个")
+        print(f"  总计处理: {end_id - start_id + 1} 个")
+        
     except Exception as e:
-        print(f"爬取失败: {e}")
+        print(f"\n爬取失败: {e}")
         db.rollback()
     finally:
         db.close()
@@ -44,17 +66,39 @@ def scrape_and_save_moves(start_id: int = 1, end_id: int = 100):
     scraper = MoveScraper(delay=1.0)
     
     try:
+        success_count = 0
+        skip_count = 0
+        error_count = 0
+        
         for move_id in range(start_id, end_id + 1):
             move_data = scraper.scrape_move_by_id(move_id)
             if move_data:
-                move = Move(**move_data)
-                db.add(move)
-                db.commit()
-                print(f"  保存招式 #{move_id} 成功")
+                # 检查是否已存在
+                existing = db.query(Move).filter(
+                    Move.move_id == move_data["move_id"]
+                ).first()
+                
+                if existing:
+                    print(f"  ⏭️  招式 #{move_id} 已存在，跳过")
+                    skip_count += 1
+                else:
+                    move = Move(**move_data)
+                    db.add(move)
+                    db.commit()
+                    print(f"  ✅ 保存招式 #{move_id} 成功")
+                    success_count += 1
+            else:
+                print(f"  ❌ 招式 #{move_id} 爬取失败")
+                error_count += 1
         
-        print(f"成功爬取并保存 {end_id - start_id + 1} 个招式")
+        print(f"\n总结:")
+        print(f"  ✅ 成功保存: {success_count} 个")
+        print(f"  ⏭️  跳过已存在: {skip_count} 个")
+        print(f"  ❌ 爬取失败: {error_count} 个")
+        print(f"  总计处理: {end_id - start_id + 1} 个")
+        
     except Exception as e:
-        print(f"爬取失败: {e}")
+        print(f"\n爬取失败: {e}")
         db.rollback()
     finally:
         db.close()
@@ -68,17 +112,39 @@ def scrape_and_save_abilities(start_id: int = 1, end_id: int = 50):
     scraper = AbilityScraper(delay=1.0)
     
     try:
+        success_count = 0
+        skip_count = 0
+        error_count = 0
+        
         for ability_id in range(start_id, end_id + 1):
             ability_data = scraper.scrape_ability_by_id(ability_id)
             if ability_data:
-                ability = Ability(**ability_data)
-                db.add(ability)
-                db.commit()
-                print(f"  保存特性 #{ability_id} 成功")
+                # 检查是否已存在
+                existing = db.query(Ability).filter(
+                    Ability.ability_id == ability_data["ability_id"]
+                ).first()
+                
+                if existing:
+                    print(f"  ⏭️  特性 #{ability_id} 已存在，跳过")
+                    skip_count += 1
+                else:
+                    ability = Ability(**ability_data)
+                    db.add(ability)
+                    db.commit()
+                    print(f"  ✅ 保存特性 #{ability_id} 成功")
+                    success_count += 1
+            else:
+                print(f"  ❌ 特性 #{ability_id} 爬取失败")
+                error_count += 1
         
-        print(f"成功爬取并保存 {end_id - start_id + 1} 个特性")
+        print(f"\n总结:")
+        print(f"  ✅ 成功保存: {success_count} 个")
+        print(f"  ⏭️  跳过已存在: {skip_count} 个")
+        print(f"  ❌ 爬取失败: {error_count} 个")
+        print(f"  总计处理: {end_id - start_id + 1} 个")
+        
     except Exception as e:
-        print(f"爬取失败: {e}")
+        print(f"\n爬取失败: {e}")
         db.rollback()
     finally:
         db.close()
@@ -92,17 +158,39 @@ def scrape_and_save_items(start_id: int = 1, end_id: int = 50):
     scraper = ItemScraper(delay=1.0)
     
     try:
+        success_count = 0
+        skip_count = 0
+        error_count = 0
+        
         for item_id in range(start_id, end_id + 1):
             item_data = scraper.scrape_item_by_id(item_id)
             if item_data:
-                item = Item(**item_data)
-                db.add(item)
-                db.commit()
-                print(f"  保存道具 #{item_id} 成功")
+                # 检查是否已存在（item表按name检查）
+                existing = db.query(Item).filter(
+                    Item.name == item_data["name"]
+                ).first()
+                
+                if existing:
+                    print(f"  ⏭️  道具 #{item_id} 已存在，跳过")
+                    skip_count += 1
+                else:
+                    item = Item(**item_data)
+                    db.add(item)
+                    db.commit()
+                    print(f"  ✅ 保存道具 #{item_id} 成功")
+                    success_count += 1
+            else:
+                print(f"  ❌ 道具 #{item_id} 爬取失败")
+                error_count += 1
         
-        print(f"成功爬取并保存 {end_id - start_id + 1} 个道具")
+        print(f"\n总结:")
+        print(f"  ✅ 成功保存: {success_count} 个")
+        print(f"  ⏭️  跳过已存在: {skip_count} 个")
+        print(f"  ❌ 爬取失败: {error_count} 个")
+        print(f"  总计处理: {end_id - start_id + 1} 个")
+        
     except Exception as e:
-        print(f"爬取失败: {e}")
+        print(f"\n爬取失败: {e}")
         db.rollback()
     finally:
         db.close()

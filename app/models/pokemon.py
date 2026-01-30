@@ -15,8 +15,8 @@ class Pokemon(Base):
     id = Column(Integer, primary_key=True, index=True)
     national_dex = Column(Integer, unique=True, index=True, nullable=False)
     name = Column(String(100), nullable=False, index=True)
-    japanese_name = Column(String(100), nullable=False)
-    english_name = Column(String(100), nullable=False, index=True)
+    japanese_name = Column(String(100))  # 允许为空
+    english_name = Column(String(100))  # 允许为空
     type1 = Column(String(20), nullable=False, index=True)
     type2 = Column(String(20))
     classification = Column(String(100))
