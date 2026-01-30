@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # MySQL数据库
+  mysql:
+    image: mysql:8.0
+    container_name: pokemon_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: pokemon_api
+      MYSQL_USER: pokemon_user
+      MYSQL_PASSWORD: pokemon_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - pokemon_network
+
+  # FastAPI应用
+  api:
+    build: .
+    container_name: pokemon_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: pokemon_user
+      MYSQL_PASSWORD: pokemon_password
+      MYSQL_DATABASE: pokemon_api
+      DEBUG: True
+    depends_on:
+      - mysql
+    networks:
+      - pokemon_network
+    volumes:
+      - ./app:/app/app
+      - ./init_db.py:/app/init_db.py
+      - ./scraper.py:/app/scraper.py
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL...' &&
+        sleep 10 &&
+        python init_db.py &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+volumes:
+  mysql_data:
+
+networks:
+  pokemon_network:
+    driver: bridge

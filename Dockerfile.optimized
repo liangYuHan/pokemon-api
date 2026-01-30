@@ -1,0 +1,49 @@
+# 多阶段构建 - 优化镜像大小
+
+# 阶段1: 构建阶段
+FROM python:3.11-slim as builder
+
+WORKDIR /app
+
+# 安装构建依赖
+RUN apt-get update && apt-get install -y \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制依赖文件
+COPY requirements.txt .
+
+# 安装Python依赖到临时目录
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# 阶段2: 运行阶段
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 只安装运行时必需的包
+RUN apt-get update && apt-get install -y \
+    libmysqlclient21 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 从构建阶段复制已安装的包
+COPY --from=builder /root/.local /root/.local
+
+# 确保Python能找到安装的包
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/root/.local/lib/python3.11/site-packages:$PYTHONPATH
+
+# 复制应用代码
+COPY . .
+
+# 暴露端口
+EXPOSE 8000
+
+# 非root用户运行
+RUN useradd -m appuser && chown -R appuser:appuser /app
+USER appuser
+
+# 启动命令
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
